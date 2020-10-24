@@ -3,8 +3,8 @@
 #include <math.h>
 using namespace std;
 
-int baseAtk, flatAtk, charLv, enemyLv, hitsPerCombo, temp1, temp2=1, temp3, configuration[10]={0}, confStorage[64][10]={0,0}, number_of_crit_in_group[10]={0}, counter, encode[10], decode[10], number_of_group=0;
-float hit_number[10], critChance, critDamage, chance_of_group[10], highest_chance=0.0, dmgSum[64]={0.0}, ATK={0.0}, dmgBonus={0.0}, Bonuses, dmg, DefDrop, enemyRes;
+int baseAtk, flatAtk, charLv, enemyLv, hitsPerCombo, temp1, temp2=1, temp3, configuration[100]={0}, confStorage[100][10]={0,0}, number_of_crit_in_group[100]={0}, counter, encode[10][100]={0,0}, digit, decode[10], number_of_group=0;
+float hit_number[10], critChance, critDamage, chance_of_group[10], highest_chance=0.0, dmgSum[100]={0.0}, ATK={0.0}, dmgBonus={0.0}, Bonuses, dmg, DefDrop, enemyRes;
 bool keepGoing = true;
 
 void readthedamnfile()
@@ -77,12 +77,15 @@ void toDamage ( int temp2 )
 void critCounter()
 {
     counter = 0;
+    digit = 0;
     for ( temp1 = 1 ; temp1 <= hitsPerCombo ; ++temp1 )
         counter += configuration [ temp1 ];
     ++number_of_crit_in_group [ counter ];
     if ( number_of_crit_in_group [ counter ] == 1 )
         ++number_of_group;
-    encode [ counter ] = ( encode [ counter ] + temp2 ) * 10;
+    while ( encode [counter ] [ digit ] != 0 )
+        ++digit;
+    encode [ counter ] [ digit ] = temp2;
 }
 
 void chance()
@@ -97,28 +100,15 @@ void chance()
         }
 }
 
-void fix()
-{
-    for ( temp1 = 1 ; temp1 <= number_of_group ; ++temp1 )
-        encode [ temp1 ] /= 10;
-}
-
 void EXPECTED()
 {
-    cout << endl << "Expected " << temp2 << " crit(s) with " << highest_chance << " % success rate to deal 1 of the following total damage ";
+    cout << endl << "Expected " << temp2 << " crit(s) with " << highest_chance << " % success rate to deal 1 of the following total damage (average dmg)" << endl;
     temp1 = 0;
-    temp3 = encode [ temp2 ];
-    while ( temp3 != 0 )
+    while ( encode [temp2] [temp1] !=0 )
     {
-        decode [ temp1 ] = temp3 % 10;
-        temp3 /= 10;
+        cout << (int)dmgSum [ encode [ temp2 ] [ temp1 ] ] << " (" << (int)dmgSum [ encode [ temp2 ] [ temp1 ] ] / hitsPerCombo << ")" << endl;
         ++temp1;
     }
-    for ( temp3 = 0 ; temp3 < temp1 ; ++temp3 )
-    {
-        cout << dmgSum [ decode [ temp3 ] ] << " ";
-    }
-    cout << endl;
 }
 int main()
 {
@@ -133,7 +123,6 @@ int main()
         ++temp2;
     }
     chance();
-    fix();
     EXPECTED();
     return 0;
 }
